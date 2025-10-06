@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Luas & Keliling</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      width: 350px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 10px;
+      background: #e8f5e9;
+      border-radius: 8px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Kalkulator Luas & Keliling</h2>
+    
+    <label for="shape">Pilih Bangun Datar:</label>
+    <select id="shape" onchange="updateInputs()">
+      <option value="persegi">Persegi</option>
+      <option value="persegiPanjang">Persegi Panjang</option>
+      <option value="lingkaran">Lingkaran</option>
+    </select>
+
+    <div id="inputs"></div>
+
+    <button onclick="hitung()">Hitung</button>
+    
+    <div class="result" id="result">Hasil akan muncul di sini</div>
+  </div>
+
+  <script>
+    function updateInputs() {
+      const shape = document.getElementById("shape").value;
+      const inputsDiv = document.getElementById("inputs");
+      let html = "";
+
+      if (shape === "persegi") {
+        html = `<input type="number" id="sisi" placeholder="Masukkan sisi (cm)">`;
+      } else if (shape === "persegiPanjang") {
+        html = `
+          <input type="number" id="panjang" placeholder="Masukkan panjang (cm)">
+          <input type="number" id="lebar" placeholder="Masukkan lebar (cm)">
+        `;
+      } else if (shape === "lingkaran") {
+        html = `<input type="number" id="jari" placeholder="Masukkan jari-jari (cm)">`;
+      }
+
+      inputsDiv.innerHTML = html;
+    }
+
+    function hitung() {
+      const shape = document.getElementById("shape").value;
+      let luas = 0, keliling = 0;
+
+      if (shape === "persegi") {
+        const sisi = parseFloat(document.getElementById("sisi").value);
+        luas = sisi * sisi;
+        keliling = 4 * sisi;
+      } else if (shape === "persegiPanjang") {
+        const panjang = parseFloat(document.getElementById("panjang").value);
+        const lebar = parseFloat(document.getElementById("lebar").value);
+        luas = panjang * lebar;
+        keliling = 2 * (panjang + lebar);
+      } else if (shape === "lingkaran") {
+        const r = parseFloat(document.getElementById("jari").value);
+        luas = Math.PI * r * r;
+        keliling = 2 * Math.PI * r;
+      }
+
+      document.getElementById("result").innerHTML = `
+        Luas = ${luas.toFixed(2)} cm² <br>
+        Keliling = ${keliling.toFixed(2)} cm
+      `;
+    }
+
+    // default tampilkan input persegi
+    updateInputs();
+  </script>
+</body>
+</html>

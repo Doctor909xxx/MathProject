@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Memory Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .game-container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 900px;
+      width: 100%;
+    }
+    h1 {
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 15px;
+      justify-content: center;
+    }
+    .card {
+      background: #007bff;
+      color: white;
+      font-size: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+      border-radius: 12px;
+      cursor: pointer;
+      user-select: none;
+      transform-style: preserve-3d;
+      transition: transform 0.6s, background 0.3s;
+    }
+    .card.flipped {
+      background: #f8f9fa;
+      color: #333;
+      font-weight: bold;
+      transform: rotateY(180deg);
+    }
+    .card.matched {
+      background: #28a745;
+      color: white;
+      animation: pulse 0.6s ease;
+      transform: rotateY(0deg);
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .status {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      transition: opacity 0.5s ease;
+    }
+    .restart-btn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .restart-btn:hover {
+      background: #0056b3;
+      transform: scale(1.05);
+    }
+    .level-select {
+      margin-bottom: 20px;
+    }
+    .level-select button {
+      margin: 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .level-select button:hover {
+      background: #0056b3;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Math Memory Game</h1>
+    <div id="menu" class="level-select">
+      <p>Pilih Level:</p>
+      <button onclick="setLevel(3)">Mudah (3 pasang)</button>
+      <button onclick="setLevel(6)">Sedang (6 pasang)</button>
+      <button onclick="setLevel(10)">Sulit (10 pasang)</button>
+    </div>
+    <div class="grid" id="grid" style="display:none;"></div>
+    <div class="status" id="status"></div>
+    <button class="restart-btn" id="restartBtn" style="display:none;" onclick="restartGame()">🔄 Mulai Lagi</button>
+  </div>
+
+  <script>
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function generatePairs(n) {
+      const pairs = [];
+      const ops = ["+", "-", "×", "÷", "√"];
+      while (pairs.length < n) {
+        let a = Math.floor(Math.random() * 30) + 2;
+        let b = Math.floor(Math.random() * 30) + 2;
+        let op = ops[Math.floor(Math.random() * ops.length)];
+        let q, ans;
+
+        if (op === "√") {
+          let c = Math.floor(Math.random() * 15) + 2;
+          q = `√${c * c}`;
+          ans = c.toString();
+        } else {
+          switch (op) {
+            case "+": q = `${a} + ${b}`; ans = (a + b).toString(); break;
+            case "-": q = `${a} - ${b}`; ans = (a - b).toString(); break;
+            case "×": q = `${a} × ${b}`; ans = (a * b).toString(); break;
+            case "÷":
+              if (a % b === 0) { q = `${a} ÷ ${b}`; ans = (a / b).toString(); }
+              else continue;
+              break;
+          }
+        }
+        pairs.push({ q, a: ans });
+      }
+      return pairs;
+    }
+
+    let cards = [];
+    let flippedCards = [];
+    let matchedCount = 0;
+    let totalPairs = 6;
+
+    function setLevel(pairsCount) {
+      totalPairs = pairsCount;
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("grid").style.display = "grid";
+      document.getElementById("restartBtn").style.display = "inline-block";
+      startGame();
+    }
+
+    function startGame() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      flippedCards = [];
+      matchedCount = 0;
+      document.getElementById("status").innerText = "Temukan semua pasangan!";
+
+      const pairs = generatePairs(totalPairs);
+
+      cards = [];
+      pairs.forEach(p => {
+        cards.push({ text: p.q, type: "q", pair: p.a });
+        cards.push({ text: p.a, type: "a", pair: p.q });
+      });
+
+      cards = shuffle(cards);
+
+      cards.forEach((card, idx) => {
+        const div = document.createElement("div");
+        div.classList.add("card");
+        div.setAttribute("data-index", idx);
+        div.innerText = "?";
+        div.onclick = () => flipCard(div, card);
+        grid.appendChild(div);
+      });
+    }
+
+    function flipCard(div, card) {
+      if (div.classList.contains("flipped") || div.classList.contains("matched") || flippedCards.length === 2) return;
+
+      div.classList.add("flipped");
+      div.innerText = card.text;
+      flippedCards.push({ div, card });
+
+      if (flippedCards.length === 2) {
+        setTimeout(checkMatch, 800);
+      }
+    }
+
+    function checkMatch() {
+      const [first, second] = flippedCards;
+      if (first.card.pair === second.card.text || second.card.pair === first.card.text) {
+        first.div.classList.add("matched");
+        second.div.classList.add("matched");
+        matchedCount++;
+        if (matchedCount === totalPairs) {
+          document.getElementById("status").innerText = "🎉 Selamat! Semua pasangan ditemukan!";
+        }
+      } else {
+        first.div.classList.remove("flipped");
+        second.div.classList.remove("flipped");
+        first.div.innerText = "?";
+        second.div.innerText = "?";
+      }
+      flippedCards = [];
+    }
+
+    function restartGame() {
+      startGame();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .quiz-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #007bff;
+    }
+    .question {
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    button.option {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #f0f0f0;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button.option:hover {
+      background: #d6eaff;
+    }
+    .result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .next-btn {
+      margin-top: 15px;
+      padding: 12px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+    }
+    .next-btn:hover {
+      background: #0056b3;
+    }
+    .timer {
+      margin-bottom: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff3d00;
+    }
+    .settings {
+      margin-bottom: 20px;
+    }
+    .settings select, .settings button {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>Math Quiz</h1>
+    <div id="settings" class="settings">
+      <p>Pilih Waktu Per Soal:</p>
+      <select id="timeLimit">
+        <option value="30">30 detik</option>
+        <option value="60" selected>60 detik</option>
+        <option value="90">90 detik</option>
+      </select>
+      <br>
+      <button onclick="startQuiz()">Mulai Quiz</button>
+    </div>
+
+    <div id="quiz" style="display:none;">
+      <div class="timer" id="timer">Waktu: 60s</div>
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <div class="result" id="result"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Soal Berikutnya</button>
+    </div>
+  </div>
+
+  <script>
+    // 🔹 fungsi shuffle
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    // 🔹 Generate 5000 soal otomatis (campur +, -, ×, ÷, √)
+    const allQuestions = [];
+    for (let i = 0; i < 5000; i++) {
+      let a = Math.floor(Math.random() * 50) + 1;
+      let b = Math.floor(Math.random() * 50) + 1;
+      let ops = ["+", "-", "×", "÷", "√"];
+      let op = ops[Math.floor(Math.random() * ops.length)];
+      let correct;
+
+      if (op === "√") {
+        // akar kuadrat bulat
+        let c = Math.floor(Math.random() * 20) + 2; 
+        a = c * c;
+        correct = c;
+        allQuestions.push({
+          q: `√${a} = ?`,
+          options: shuffle([
+            correct.toString(),
+            (correct + 1).toString(),
+            (correct - 1).toString(),
+            (correct + 2).toString()
+          ]),
+          answer: correct.toString()
+        });
+        continue;
+      }
+
+      // operasi biasa
+      switch (op) {
+        case "+": correct = a + b; break;
+        case "-": correct = a - b; break;
+        case "×": correct = a * b; break;
+        case "÷": correct = (a % b === 0) ? a / b : (a / b).toFixed(2); break;
+      }
+
+      let options = [correct.toString()];
+      while (options.length < 4) {
+        let wrong = correct + Math.floor(Math.random() * 10) - 5;
+        if (!options.includes(wrong.toString())) options.push(wrong.toString());
+      }
+      options = shuffle(options);
+
+      allQuestions.push({ q: `${a} ${op} ${b} = ?`, options, answer: correct.toString() });
+    }
+
+    // 🔹 variabel global
+    let questions = [];
+    let currentQuestion = 0;
+    let score = 0;
+    let timer;
+    let timePerQuestion = 60;
+    let timeLeft;
+
+    function startQuiz() {
+      questions = shuffle([...allQuestions]).slice(0, 10); // ambil 10 soal random
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("settings").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      
+      timePerQuestion = parseInt(document.getElementById("timeLimit").value);
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      clearInterval(timer);
+      timeLeft = timePerQuestion;
+      document.getElementById("timer").innerText = `Waktu: ${timeLeft}s`;
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = `Waktu: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          nextQuestion(); // auto lanjut kalau waktu habis
+        }
+      }, 1000);
+
+      const q = questions[currentQuestion];
+      document.getElementById("question").innerText = q.q;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.classList.add("option");
+        btn.onclick = () => checkAnswer(opt);
+        optionsDiv.appendChild(btn);
+      });
+      document.getElementById("result").innerText = "";
+      document.getElementById("nextBtn").style.display = "none";
+    }
+
+    function checkAnswer(selected) {
+      clearInterval(timer);
+      const q = questions[currentQuestion];
+      const resultDiv = document.getElementById("result");
+      if (selected.toString() === q.answer) {
+        resultDiv.innerText = "✅ Benar!";
+        resultDiv.style.color = "green";
+        score++;
+      } else {
+        resultDiv.innerText = "❌ Salah! Jawaban benar: " + q.answer;
+        resultDiv.style.color = "red";
+      }
+      document.querySelectorAll(".option").forEach(btn => btn.disabled = true);
+      document.getElementById("nextBtn").style.display = "inline-block";
+    }
+
+    function nextQuestion() {
+      clearInterval(timer);
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        endQuiz();
+      }
+    }
+
+    function endQuiz() {
+      clearInterval(timer);
+      document.getElementById("quiz").innerHTML = `
+        <h2>Quiz Selesai!</h2>
+        <p>Skor kamu: ${score} / ${questions.length}</p>
+        <button onclick="location.reload()" class="next-btn">🔄 Mulai Lagi</button>
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konversi Satuan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+    .converter {
+      background: #fff;
+      color: #333;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      width: 400px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #007bff;
+    }
+    select, input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      padding: 12px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="converter">
+    <h1>Konversi Satuan</h1>
+    <select id="category" onchange="updateUnits()">
+      <option value="length">Panjang</option>
+      <option value="weight">Berat</option>
+      <option value="time">Waktu</option>
+    </select>
+    <input type="number" id="inputValue" placeholder="Masukkan nilai">
+    <select id="fromUnit"></select>
+    <select id="toUnit"></select>
+    <button onclick="convert()">Konversi</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const units = {
+      length: ["cm", "m", "km"],
+      weight: ["gram", "kg", "ton"],
+      time: ["detik", "menit", "jam"]
+    };
+
+    function updateUnits() {
+      const category = document.getElementById("category").value;
+      const fromUnit = document.getElementById("fromUnit");
+      const toUnit = document.getElementById("toUnit");
+
+      fromUnit.innerHTML = "";
+      toUnit.innerHTML = "";
+
+      units[category].forEach(u => {
+        fromUnit.innerHTML += `<option value="${u}">${u}</option>`;
+        toUnit.innerHTML += `<option value="${u}">${u}</option>`;
+      });
+    }
+
+    function convert() {
+      const category = document.getElementById("category").value;
+      const value = parseFloat(document.getElementById("inputValue").value);
+      const from = document.getElementById("fromUnit").value;
+      const to = document.getElementById("toUnit").value;
+      let result = 0;
+
+      if (isNaN(value)) {
+        document.getElementById("result").innerText = "Masukkan angka dulu!";
+        return;
+      }
+
+      if (category === "length") {
+        // konversi panjang
+        let cmValue = 0;
+        if (from === "cm") cmValue = value;
+        if (from === "m") cmValue = value * 100;
+        if (from === "km") cmValue = value * 100000;
+
+        if (to === "cm") result = cmValue;
+        if (to === "m") result = cmValue / 100;
+        if (to === "km") result = cmValue / 100000;
+      } 
+      else if (category === "weight") {
+        // konversi berat
+        let gValue = 0;
+        if (from === "gram") gValue = value;
+        if (from === "kg") gValue = value * 1000;
+        if (from === "ton") gValue = value * 1000000;
+
+        if (to === "gram") result = gValue;
+        if (to === "kg") result = gValue / 1000;
+        if (to === "ton") result = gValue / 1000000;
+      } 
+      else if (category === "time") {
+        // konversi waktu
+        let sValue = 0;
+        if (from === "detik") sValue = value;
+        if (from === "menit") sValue = value * 60;
+        if (from === "jam") sValue = value * 3600;
+
+        if (to === "detik") result = sValue;
+        if (to === "menit") result = sValue / 60;
+        if (to === "jam") result = sValue / 3600;
+      }
+
+      document.getElementById("result").innerText = `${value} ${from} = ${result} ${to}`;
+    }
+
+    // load default
+    updateUnits();
+  </script>
+</body>
+</html>

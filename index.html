@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Project</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #6dd5ed, #2193b0);
+      color: #fff;
+      text-align: center;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #fff;
+    }
+    /* Tombol titik tiga */
+    .menu-btn {
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    /* Sidebar */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0;
+      right: 0;
+      background: #1e1e1e;
+      overflow-x: hidden;
+      transition: 0.4s;
+      padding-top: 60px;
+      z-index: 1000;
+      text-align: left;
+    }
+    .sidebar a {
+      padding: 12px 20px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #ddd;
+      display: block;
+      transition: 0.3s;
+    }
+    .sidebar a:hover {
+      background: #333;
+      color: #fff;
+    }
+    .sidebar .closebtn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      z-index: 999;
+    }
+    .profile {
+      margin: 20px 0;
+    }
+    .profile img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      object-fit: cover;
+    }
+    .btn-container {
+      margin-top: 30px;
+    }
+    a.btn-link {
+      display: inline-block;
+      margin: 10px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: #fff;
+      color: #2193b0;
+      font-weight: bold;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    a.btn-link:hover {
+      background: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Math Project</h1>
+    <button class="menu-btn" onclick="openSidebar()">⋮</button>
+  </header>
+
+  <!-- Overlay -->
+  <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <div id="mySidebar" class="sidebar">
+    <span class="closebtn" onclick="closeSidebar()">×</span>
+    <a href="#">📑 Laporan Tugas Matematika</a>
+    <p style="padding: 0 20px; color: #aaa; font-size:14px;">
+      Website ini dibuat untuk memenuhi tugas Matematika kelas X TKJ 2.
+      <a href="laporan.html" style="color:#4facfe">[Laporan]</a>
+    </p>
+    <a href="#">📚 Referensi / Sumber Belajar</a>
+    <p style="padding: 0 20px; color: #aaa; font-size:14px;">
+      Website ini dibuat sebagai laporan tugas proyek Matematika.
+      <a href="referensi.html" style="color:#4facfe">[Laporan]</a>
+    </p>
+    <a href="#">💻 Source Code</a>
+    <p style="padding: 0 20px; color: #aaa; font-size:14px;">
+      Kode dibuat dengan HTML, CSS, dan JavaScript.<br>
+      Link repository: <a href="#" style="color:#4facfe">[GitHub]</a>
+    </p>
+  </div>
+
+  <div class="profile">
+    <img src="foto.jpg" alt="Foto Tema">
+    <h2>Math Project</h2>
+    <p>Selamat datang di Website SmartMath
+Sebuah website sederhana yang dibuat untuk membantu pembelajaran Matematika.
+Di sini terdapat berbagai fitur seperti kalkulator dasar, kalkulator luas & keliling bangun datar, kalkulator akar, serta latihan soal, dll.
+Semoga website ini dapat menjadi sarana belajar yang bermanfaat.</p>
+  </div>
+  
+  <div class="footer">
+      &copy; 2025 Website Math Project
+  </div>
+
+  <div class="btn-container">
+    <a href="akar.html" class="btn-link">Kalkulator Akar</a>
+    <a href="kuadrat.html" class="btn-link">Kalkulator Kuadrat</a>
+    <a href="kalkulatorluas.html" class="btn-link">Kalkulator Luas & Keliling</a>
+    <a href="kalsederhana.html" class="btn-link">Kalkulator Dasar</a>
+    <a href="konversi.html" class="btn-link">Konversi Satuan</a>
+    <a href="trigonometri.html" class="btn-link">Kalkulator Trigonometri</a>
+    <a href="MathQuiz.html" class="btn-link">Math Quiz</a>
+    <a href="MathMemory.html" class="btn-link">Math Memory</a>
+  </div>
+
+  <script>
+    function openSidebar() {
+      document.getElementById("mySidebar").style.width = "300px";
+      document.getElementById("overlay").style.display = "block";
+    }
+    function closeSidebar() {
+      document.getElementById("mySidebar").style.width = "0";
+      document.getElementById("overlay").style.display = "none";
+    }
+  </script>
+</body>
+</html>

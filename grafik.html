@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grafik Fungsi</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+    .container {
+      background: #fff;
+      color: #333;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 600px;
+    }
+    h1 {
+      color: #185a9d;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 60px;
+      padding: 5px;
+      margin: 5px;
+      text-align: center;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #185a9d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #12406a;
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Grafik Fungsi</h1>
+    <p>Masukkan koefisien persamaan kuadrat: <b>y = ax² + bx + c</b></p>
+    <input type="number" id="a" placeholder="a">
+    <input type="number" id="b" placeholder="b">
+    <input type="number" id="c" placeholder="c">
+    <br>
+    <button onclick="plotQuadratic()">Tampilkan Grafik</button>
+
+    <p>Atau persamaan linear: <b>y = mx + b</b></p>
+    <input type="number" id="m" placeholder="m">
+    <input type="number" id="n" placeholder="b">
+    <br>
+    <button onclick="plotLinear()">Tampilkan Grafik</button>
+
+    <canvas id="graphCanvas" width="500" height="400"></canvas>
+  </div>
+
+  <script>
+    let chart;
+
+    function plotQuadratic() {
+      const a = parseFloat(document.getElementById("a").value) || 0;
+      const b = parseFloat(document.getElementById("b").value) || 0;
+      const c = parseFloat(document.getElementById("c").value) || 0;
+
+      const xValues = [];
+      const yValues = [];
+      for (let x = -10; x <= 10; x += 0.5) {
+        xValues.push(x);
+        yValues.push(a * x * x + b * x + c);
+      }
+      renderChart(xValues, yValues, `y = ${a}x² + ${b}x + ${c}`);
+    }
+
+    function plotLinear() {
+      const m = parseFloat(document.getElementById("m").value) || 0;
+      const n = parseFloat(document.getElementById("n").value) || 0;
+
+      const xValues = [];
+      const yValues = [];
+      for (let x = -10; x <= 10; x += 1) {
+        xValues.push(x);
+        yValues.push(m * x + n);
+      }
+      renderChart(xValues, yValues, `y = ${m}x + ${n}`);
+    }
+
+    function renderChart(xValues, yValues, label) {
+      const ctx = document.getElementById("graphCanvas").getContext("2d");
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: xValues,
+          datasets: [{
+            label: label,
+            data: yValues,
+            borderColor: "blue",
+            borderWidth: 2,
+            fill: false,
+            tension: 0.2
+          }]
+        },
+        options: {
+          responsive: false,
+          scales: {
+            x: { title: { display: true, text: "x" } },
+            y: { title: { display: true, text: "y" } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

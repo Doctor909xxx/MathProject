@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Persamaan Kuadrat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #6dd5ed, #2193b0);
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: #fff;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      padding: 12px;
+      background: #007bff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f7f9fc;
+      border-left: 5px solid #007bff;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kalkulator Persamaan Kuadrat</h1>
+    <p>Masukkan nilai <b>a</b>, <b>b</b>, dan <b>c</b> dari persamaan kuadrat <i>ax² + bx + c = 0</i></p>
+
+    <label for="a">Nilai a:</label>
+    <input type="number" id="a" placeholder="Contoh: 1">
+
+    <label for="b">Nilai b:</label>
+    <input type="number" id="b" placeholder="Contoh: -3">
+
+    <label for="c">Nilai c:</label>
+    <input type="number" id="c" placeholder="Contoh: 2">
+
+    <button onclick="hitung()">Hitung Akar</button>
+
+    <div id="hasil" class="result"></div>
+  </div>
+
+  <script>
+    function hitung() {
+      const a = parseFloat(document.getElementById('a').value);
+      const b = parseFloat(document.getElementById('b').value);
+      const c = parseFloat(document.getElementById('c').value);
+      const hasilDiv = document.getElementById('hasil');
+
+      // reset dulu
+      hasilDiv.innerHTML = "";
+
+      if (isNaN(a) || isNaN(b) || isNaN(c) || a === 0) {
+        hasilDiv.innerHTML = "<b>Masukkan nilai a, b, c dengan benar! (a ≠ 0)</b>";
+        return;
+      }
+
+      const D = (b * b) - (4 * a * c); // diskriminan
+      let output = `<p>Persamaan: ${a}x² + ${b}x + ${c} = 0</p>`;
+      output += `<p>Diskriminan (D) = ${D}</p>`;
+
+      if (D > 0) {
+        const x1 = (-b + Math.sqrt(D)) / (2 * a);
+        const x2 = (-b - Math.sqrt(D)) / (2 * a);
+        output += `<p>Akar-akar real berbeda:</p>`;
+        output += `<p>x₁ = ${x1.toFixed(2)}, x₂ = ${x2.toFixed(2)}</p>`;
+      } else if (D === 0) {
+        const x = -b / (2 * a);
+        output += `<p>Akar real kembar:</p>`;
+        output += `<p>x = ${x.toFixed(2)}</p>`;
+      } else {
+        const real = (-b / (2 * a)).toFixed(2);
+        const imag = (Math.sqrt(-D) / (2 * a)).toFixed(2);
+        output += `<p>Akar imajiner:</p>`;
+        output += `<p>x₁ = ${real} + ${imag}i, x₂ = ${real} - ${imag}i</p>`;
+      }
+
+      hasilDiv.innerHTML = output;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kalkulator Akar Matematika</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 32px;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    color: #222;
+  }
+  .card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+    width: 800px;
+    max-width: 100%;
+  }
+  h1 {
+    margin: 0;
+    font-size: 26px;
+    color: #1e3c72;
+  }
+  p.lead {
+    margin-top: 6px;
+    margin-bottom: 20px;
+    color: #555;
+  }
+  label {
+    display: block;
+    margin-top: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+  select, input, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+  button {
+    background: #4facfe;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    background: #00c6ff;
+  }
+  button.secondary {
+    background: #eee;
+    color: #333;
+  }
+  .row {
+    display: flex;
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .col {
+    flex: 1;
+  }
+  .result {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f1fff4;
+    border-left: 6px solid #4caf50;
+    font-size: 16px;
+  }
+  .steps {
+    margin-top: 12px;
+    padding: 12px;
+    background: #fdf6e3;
+    border-left: 6px solid #ff9800;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #444;
+  }
+  code {
+    background: #eee;
+    padding: 2px 5px;
+    border-radius: 5px;
+  }
+  small {
+    color: #666;
+    display: block;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Kalkulator Akar Matematika</h1>
+    <p class="lead">Hitung akar kuadrat, akar-n, sederhanakan bentuk akar, dan evaluasi nested radical — termasuk bilangan negatif (hasil imajiner).</p>
+
+    <label for="mode">Pilih Mode</label>
+    <select id="mode" onchange="renderInputs()">
+      <option value="sqrt">Akar Kuadrat (√)</option>
+      <option value="nth">Akar-n (ⁿ√)</option>
+      <option value="simplify">Sederhanakan Bentuk Akar</option>
+      <option value="nested">Evaluasi Nested Radical (umum)</option>
+    </select>
+
+    <div id="inputsArea"></div>
+
+    <div class="row">
+      <div class="col"><button onclick="compute()">Hitung</button></div>
+      <div class="col"><button class="secondary" onclick="clearOutput()">Clear</button></div>
+    </div>
+
+    <div id="output" class="result" style="display:none">
+      <strong>Hasil:</strong>
+      <div id="outVal" style="margin-top:10px"></div>
+      <div id="outSteps" class="steps" style="display:none"></div>
+    </div>
+
+    <small>Catatan:  
+      • √ dari bilangan negatif → ditampilkan dengan <code>i</code> (unit imajiner).  
+      • Nested radical mendukung format umum, contoh: <code>sqrt(2+sqrt(3+sqrt(5)))</code>.  
+    </small>
+  </div>
+
+<script>
+/* ------------------- */
+function primeFactors(n) {
+  const res = {};
+  let num = Math.abs(Math.trunc(n));
+  for (let p=2; p*p<=num; p++) {
+    while (num % p === 0) { res[p] = (res[p]||0)+1; num/=p; }
+  }
+  if (num>1) res[num] = (res[num]||0)+1;
+  return res;
+}
+
+function simplifyRadical(n, k=2) {
+  const pf = primeFactors(n);
+  let outside = 1, inside = 1;
+  let stepsArr = [];
+  for (const [pStr,e] of Object.entries(pf)) {
+    const p = Number(pStr);
+    const m = Math.floor(e / k);
+    const r = e % k;
+    if (m>0) {
+      outside *= Math.pow(p, m);
+      stepsArr.push(`${p}^${e} → ${p}^${m*k} * ${p}^${r}`);
+    } else {
+      stepsArr.push(`${p}^${e} tetap di dalam akar`);
+    }
+    if (r>0) inside *= Math.pow(p, r);
+  }
+  return {outside, inside, steps: stepsArr.join(" ; ")};
+}
+
+/* nth root with imaginary support */
+function nthRoot(x, n, prec=6) {
+  if (n===0) return NaN;
+  if (x>=0) return Math.pow(x,1/n).toFixed(prec);
+  if (n%2===1) return (-Math.pow(-x,1/n)).toFixed(prec);
+  // even root of negative → imaginary
+  const val = Math.pow(-x,1/n).toFixed(prec);
+  return `${val}i`;
+}
+
+/* Nested radical parser (recursive) */
+function evalNested(expr) {
+  // Replace sqrt with Math.sqrt, but safe parse parentheses
+  try {
+    const safe = expr.replace(/sqrt/gi,"Math.sqrt");
+    return eval(safe);
+  } catch {
+    return NaN;
+  }
+}
+
+/* UI rendering */
+function renderInputs() {
+  const mode = document.getElementById('mode').value;
+  const area = document.getElementById('inputsArea');
+  if (mode==="sqrt") {
+    area.innerHTML = `
+      <label>Bilangan (x)</label>
+      <input id="val_x" type="number" placeholder="contoh: -16 atau 25">
+      <label>Presisi desimal</label>
+      <input id="prec" type="number" placeholder="default 6">
+    `;
+  } else if (mode==="nth") {
+    area.innerHTML = `
+      <label>Bilangan (x)</label>
+      <input id="val_x" type="number" placeholder="contoh: -27 atau 64">
+      <label>n (akar ke-n)</label>
+      <input id="val_n" type="number" placeholder="contoh: 3">
+      <label>Presisi desimal</label>
+      <input id="prec" type="number" placeholder="default 6">
+    `;
+  } else if (mode==="simplify") {
+    area.innerHTML = `
+      <label>Bilangan bulat positif (n)</label>
+      <input id="val_n" type="number" placeholder="contoh: 72">
+      <label>k (akar-k)</label>
+      <input id="val_k" type="number" placeholder="contoh: 2 untuk √, 3 untuk ∛">
+    `;
+  } else if (mode==="nested") {
+    area.innerHTML = `
+      <label>Ekspresi Nested Radical</label>
+      <input id="expr" type="text" placeholder="contoh: sqrt(2+sqrt(3+sqrt(5)))">
+      <label>Presisi desimal</label>
+      <input id="prec" type="number" placeholder="default 8">
+    `;
+  }
+}
+
+function showOutput(val, steps) {
+  document.getElementById('output').style.display = 'block';
+  document.getElementById('outVal').innerHTML = val;
+  const sEl = document.getElementById('outSteps');
+  if (steps) {
+    sEl.style.display = 'block';
+    sEl.innerHTML = steps;
+  } else {
+    sEl.style.display = 'none';
+  }
+}
+
+function clearOutput() {
+  document.getElementById('output').style.display = 'none';
+  document.getElementById('outVal').innerHTML = '';
+  document.getElementById('outSteps').innerHTML = '';
+}
+
+/* Main compute */
+function compute() {
+  clearOutput();
+  const mode = document.getElementById('mode').value;
+
+  if (mode==="sqrt") {
+    const x = Number(document.getElementById('val_x').value);
+    const prec = Number(document.getElementById('prec').value)||6;
+    const res = nthRoot(x,2,prec);
+    let steps="";
+    if (Number.isInteger(x) && x>0) {
+      const s=simplifyRadical(x,2);
+      steps=`Sederhana: ${s.outside}√${s.inside===1? "":s.inside} — faktor: ${s.steps}`;
+    }
+    showOutput(`<b>√${x} = ${res}</b>`,steps);
+  }
+
+  if (mode==="nth") {
+    const x=Number(document.getElementById('val_x').value);
+    const n=Number(document.getElementById('val_n').value);
+    const prec=Number(document.getElementById('prec').value)||6;
+    const res=nthRoot(x,n,prec);
+    let steps="";
+    if (Number.isInteger(x)&&x>0&&Number.isInteger(n)&&n>1){
+      const s=simplifyRadical(x,n);
+      steps=`Sederhana: ${s.outside}${s.inside===1? "":` * ${n}√${s.inside}`} — faktor: ${s.steps}`;
+    }
+    showOutput(`<b>${n}√${x} = ${res}</b>`,steps);
+  }
+
+  if (mode==="simplify") {
+    const n=Number(document.getElementById('val_n').value);
+    const k=Number(document.getElementById('val_k').value)||2;
+    if (n<0) {showOutput("Tidak bisa simplifikasi akar bilangan negatif → gunakan mode akar untuk hasil imajiner");return;}
+    const s=simplifyRadical(n,k);
+    let form = (s.inside===1)?`${s.outside}`:`${s.outside}${k===2?"√":`${k}√`}${s.inside}`;
+    showOutput(`<b>${k}√${n} = ${form}</b>`, `Langkah: ${s.steps}`);
+  }
+
+  if (mode==="nested") {
+    const expr=document.getElementById('expr').value;
+    const prec=Number(document.getElementById('prec').value)||8;
+    const val=evalNested(expr);
+    if (isNaN(val)) {showOutput("<span style='color:red'>Ekspresi tidak valid</span>");return;}
+    showOutput(`<b>${expr} = ${val.toFixed(prec)}</b>`, `Dievaluasi dengan ekspansi bertingkat.`);
+  }
+}
+
+/* default */
+renderInputs();
+</script>
+</body>
+</html>
